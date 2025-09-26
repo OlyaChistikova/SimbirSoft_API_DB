@@ -3,11 +3,11 @@ package helpers;
 import java.sql.*;
 
 public class DataBaseHelper {
-    private String url = "jdbc:mysql://localhost:3306/wordpress";
-    private String username = "wordpress";
-    private String password = "wordpress";
 
     private Connection getConnection() throws SQLException {
+        String url = ParametersProvider.getProperty("urlDB");
+        String username = ParametersProvider.getProperty("usernameDB");
+        String password = ParametersProvider.getProperty("passwordDB");
         return DriverManager.getConnection(url, username, password);
     }
 
