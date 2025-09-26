@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+    <entry key="apiUrl">http://localhost:8000/</entry>
+    <entry key="token">T2x5YS5DaGlzdGlrb3ZhOjEyMy1UZXN0LkNoaXN0aWtvdmE=</entry>
+    <entry key="posts_path">index.php?rest_route=/wp/v2/posts</entry>
+    <entry key="usernameAdmin">Olya.Chistikova</entry>
+    <entry key="passwordAdmin">123-Test.Chistikova</entry>
+    <entry key="usernameAuthor">Test_User</entry>
+    <entry key="passwordAuthor">test_Password-123</entry>
+    <entry key="urlDB">jdbc:mysql://localhost:3306/wordpress</entry>
+    <entry key="usernameDB">wordpress</entry>
+    <entry key="passwordDB">wordpress</entry>
+</properties>
