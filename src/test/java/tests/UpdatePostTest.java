@@ -1,22 +1,31 @@
 package tests;
 
-import helpers.BaseRequests;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import pojo.DataError;
+
 import pojo.DataPost;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
+import static helpers.BaseRequests.*;
 
 public class UpdatePostTest extends BaseTest {
     private Integer postId;
+
+    @BeforeMethod
+    public void createPostForUpdate() {
+        DataPost requestBody = createPostBody("Старый пост", "Привет! Это мой старый пост.", "publish");
+        postId = createPost(requestBody, TOKEN).getId();
+    }
+
+    @AfterMethod
+    public void deleteCreatedPost() {
+        deletePostAfterCreation(postId);
+    }
 
     @Test
     public void updateCorrectPostWithAuthTest() {
@@ -39,9 +48,9 @@ public class UpdatePostTest extends BaseTest {
 
     @DataProvider(name = "updateIdProvider")
     public static Object[][] updateIdProvider() {
-        return new Object[][] {
-                { 999999 }, // Предположительно несуществующий очень большой ID
-                { 0 }      // 0, как потенциально неправильный ID
+        return new Object[][]{
+                {999999}, // Предположительно несуществующий очень большой ID
+                {0}      // 0, как потенциально неправильный ID
         };
     }
 
@@ -62,7 +71,7 @@ public class UpdatePostTest extends BaseTest {
 
     @Test
     public void updateCorrectPostWithoutAuthTest() {
-        DataPost responseBeforeGetPost = getPostById(postId, token);
+        DataPost responseBeforeGetPost = getPostById(postId);
         Assert.assertEquals(responseBeforeGetPost.getStatus(), "publish");
 
         String titleResponse = responseBeforeGetPost.getTitle().getRendered();
@@ -72,87 +81,12 @@ public class UpdatePostTest extends BaseTest {
         DataPost requestUpdateBody = createPostBodyWithId(postId, "Обновленный тестовый пост без авторизации", "Это мой обновленный пост без авторизации.", "publish");
         updatePostWithoutAuth(requestUpdateBody, postId);
 
-        DataPost responseAfterGetPost = getPostById(postId, token);
+        DataPost responseAfterGetPost = getPostById(postId);
         Assert.assertEquals(responseBeforeGetPost.getId(), responseAfterGetPost.getId());
         Assert.assertEquals(titleResponse, responseAfterGetPost.getTitle().getRendered());
         Assert.assertEquals(contentResponse, responseAfterGetPost.getContent().getRendered().replace("<p>", "").replace("</p>", "").trim());
         Assert.assertEquals(statusResponse, responseAfterGetPost.getStatus());
 
-        checkSuccessPostDb(postId,"Старый пост", "Привет! Это мой старый пост.", "publish");
-    }
-
-    /**
-     * Успешно обновляет пост по заданным данным.
-     *
-     * @param requestBody Данные для обновления поста в формате DataPost.
-     * @param postId      ID поста, который необходимо обновить.
-     * @return Объект обновленного DataPost.
-     */
-    public DataPost updatePostWithAuthSuccess(DataPost requestBody, Integer postId) {
-        return given()
-                .spec(BaseRequests.requestSpec(URL, token))
-                .body(requestBody)
-                .log().body()
-                .when()
-                .put(POSTS_PATH + "/" + postId)
-                .then()
-                .statusCode(200)
-                .log().all()
-                .body("id", equalTo(postId))
-                .extract()
-                .as(DataPost.class);
-    }
-
-    /**
-     * Обрабатывает ошибочный случай обновления несуществующего или удаленного поста.
-     *
-     * @param requestBody Данные для обновления в формате DataError.
-     * @param updateId    ID поста, который пытаются обновить.
-     */
-    public void updateInvalidPost(DataPost requestBody, Integer updateId) {
-        given()
-                .spec(BaseRequests.requestSpec(URL, token))
-                .body(requestBody)
-                .when()
-                .put(POSTS_PATH + "/" + updateId)
-                .then()
-                .statusCode(404)
-                .body("code", equalTo("rest_post_invalid_id"))
-                .body("message", equalTo("Неверный ID записи."))
-                .body("data.status", equalTo(404))
-                .extract()
-                .as(DataError.class);
-    }
-
-    /**
-     * Обрабатывает ошибочный случай обновления поста без авторизации.
-     *
-     * @param requestBody Данные для обновления в формате DataError.
-     * @param postId      ID поста, который пытаются обновить.
-     */
-    public void updatePostWithoutAuth(DataPost requestBody, Integer postId) {
-        given()
-                .spec(BaseRequests.requestSpec(URL))
-                .body(requestBody)
-                .when()
-                .put(POSTS_PATH + "/" + postId)
-                .then()
-                .statusCode(401)
-                .body("code", equalTo("rest_cannot_edit"))
-                .body("message", equalTo("Извините, вам не разрешено редактировать эту запись."))
-                .body("data.status", equalTo(401))
-                .extract()
-                .as(DataError.class);
-    }
-
-    @BeforeMethod
-    public void createPostForUpdate() {
-        DataPost requestBody = createPostBody("Старый пост", "Привет! Это мой старый пост.", "publish");
-        postId = createPost(requestBody, token).getId();
-    }
-
-    @AfterMethod
-    public void deleteCreatedPost() {
-        deletePostAfterCreation(postId);
+        checkSuccessPostDb(postId, "Старый пост", "Привет! Это мой старый пост.", "publish");
     }
 }
