@@ -23,7 +23,7 @@ public class DeletePostTest extends BaseTest {
     public void deleteCorrectPostWithAuthTest() {
         deleteCorrectPost(postId);
 
-        List<DataPost> listPosts = getAllPosts();
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
         List<Integer> ids = listPosts.stream().map(DataPost::getId).collect(Collectors.toList());
         Assert.assertFalse(ids.contains(postId));
 
@@ -35,7 +35,7 @@ public class DeletePostTest extends BaseTest {
         deleteCorrectPost(postId);
         deleteAlreadyDeletedPost(postId);
 
-        List<DataPost> listPosts = getAllPosts();
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
         List<Integer> ids = listPosts.stream().map(DataPost::getId).collect(Collectors.toList());
         Assert.assertFalse(ids.contains(postId));
 
@@ -46,12 +46,12 @@ public class DeletePostTest extends BaseTest {
     public void deleteCorrectPostWithoutAuthTest() {
         deleteCorrectPostWithoutAuth(postId);
 
-        List<DataPost> listPosts = getAllPosts();
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
         List<Integer> ids = listPosts.stream().map(DataPost::getId).collect(Collectors.toList());
         Assert.assertTrue(ids.contains(postId));
 
         checkDeleteDb(postId, "publish");
 
-        deletePostAfterCreation(postId);
+        deleteItemById(POSTS_PATH, postId, TOKEN);
     }
 }
