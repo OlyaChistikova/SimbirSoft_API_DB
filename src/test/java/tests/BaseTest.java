@@ -4,8 +4,8 @@ import helpers.BaseRequests;
 
 import helpers.DataBaseHelper;
 import helpers.ParametersProvider;
+import io.restassured.response.ResponseBodyExtractionOptions;
 import org.testng.Assert;
-import pojo.DataPost;
 
 import java.util.List;
 
@@ -38,47 +38,60 @@ public class BaseTest {
     protected static final String passwordAuthor = ParametersProvider.getProperty("passwordAuthor");
 
     /**
-     * Получение списка всех публичных постов без авторизации
+     * Получение списка объектов любого типа по указанному маршруту без авторизации.
      *
-     * @return Список объектов DataPost.
+     * @param tClass       Тип объекта, который нужно вернуть.
+     * @param resourcePath Маршрут к API-ресурсу.
+     * @param <T>          Тип объектов в списке.
+     * @return Список объектов заданного типа.
      */
-    public List<DataPost> getAllPosts() {
-        return given()
+    public <T> List<T> getResourceAsList(Class<T> tClass, String resourcePath) {
+        ResponseBodyExtractionOptions body = given()
                 .spec(BaseRequests.requestSpec())
                 .when()
-                .get(POSTS_PATH)
+                .get(resourcePath)
                 .then()
                 .statusCode(200)
-                .extract().body().jsonPath().getList("", DataPost.class);
+                .extract().body();
+
+        return body.jsonPath().getList("", tClass);
     }
 
     /**
-     * Получает пост по ID с авторизацией.
+     * Получает объект по ID с авторизацией.
      *
-     * @param postId ID поста.
-     * @return Объект DataPost с данными поста.
+     * @param tClass       Тип объекта, который нужно вернуть.
+     * @param resourcePath Маршрут к API-ресурсу.
+     * @param itemId       Идентификатор нужного объекта.
+     * @param authToken    Токен аутентификации.
+     * @param <T>          Тип объекта.
+     * @return Объект заданного типа.
      */
-    public DataPost getPostById(Integer postId) {
-        return given()
-                .spec(BaseRequests.requestSpec(TOKEN))
+    public <T> T getItemById(Class<T> tClass, String resourcePath, Integer itemId, String authToken) {
+        ResponseBodyExtractionOptions body = given()
+                .spec(BaseRequests.requestSpec(authToken))
                 .when()
-                .get(POSTS_PATH + "/" + postId)
+                .get(resourcePath + "/" + itemId)
                 .then()
                 .statusCode(200)
-                .body("id", equalTo(postId))
-                .extract().as(DataPost.class);
+                .body("id", equalTo(itemId))
+                .extract().body();
+
+        return body.as(tClass);
     }
 
     /**
-     * Удаление поста с заданным id
+     * Удаляет объект по его ID с авторизацией.
      *
-     * @param postId id поста, который необходимо удалить
+     * @param resourcePath Маршрут к API-ресурсу.
+     * @param itemId       Идентификатор объекта для удаления.
+     * @param authToken    Токен аутентификации.
      */
-    public void deletePostAfterCreation(Integer postId) {
+    public void deleteItemById(String resourcePath, Integer itemId, String authToken) {
         given()
-                .spec(BaseRequests.requestSpec(TOKEN))
+                .spec(BaseRequests.requestSpec(authToken))
                 .when()
-                .delete(POSTS_PATH + "/" + postId)
+                .delete(resourcePath + "/" + itemId)
                 .then()
                 .statusCode(200);
     }
@@ -92,10 +105,10 @@ public class BaseTest {
      * @param status  Ожидаемый статус.
      */
     public void checkSuccessPostDb(Integer post_id, String title, String content, String status) {
-        Assert.assertTrue(dbHelper.isPostExist(post_id), "Пост не найден в базе");
-        Assert.assertEquals(dbHelper.getPostTitle(post_id), title, "Заголовок поста в базе не совпадает");
-        Assert.assertEquals(dbHelper.getPostContent(post_id), content, "Содержимое поста в базе не совпадает");
-        Assert.assertEquals(dbHelper.getPostStatus(post_id), status, "Статус поста в базе не совпадает");
+        Assert.assertEquals(dbHelper.getPostById(post_id).getId(), post_id, "ID поста в базе не совпадает");
+        Assert.assertEquals(dbHelper.getPostById(post_id).getTitle().getRaw(), title, "Заголовок поста в базе не совпадает");
+        Assert.assertEquals(dbHelper.getPostById(post_id).getContent().getRaw(), content, "Содержимое поста в базе не совпадает");
+        Assert.assertEquals(dbHelper.getPostById(post_id).getStatus(), status, "Статус поста в базе не совпадает");
     }
 
     /**
@@ -104,7 +117,7 @@ public class BaseTest {
      * @param post_id ID поста.
      */
     public void checkErrorDb(Integer post_id) {
-        Assert.assertFalse(dbHelper.isPostExist(post_id), "Пост найден в базе");
+        Assert.assertNull(dbHelper.getPostById(post_id), "Пост найден в базе");
     }
 
     /**
@@ -114,7 +127,7 @@ public class BaseTest {
      * @param status  Ожидаемый статус.
      */
     public void checkDeleteDb(Integer post_id, String status) {
-        Assert.assertTrue(dbHelper.isPostExist(post_id), "Пост найден в базе");
-        Assert.assertEquals(dbHelper.getPostStatus(post_id), status, "Статус поста в базе не совпадает");
+        Assert.assertEquals(dbHelper.getPostById(post_id).getId(), post_id, "Пост не найден в базе");
+        Assert.assertEquals(dbHelper.getPostById(post_id).getStatus(), status, "Статус поста в базе не совпадает");
     }
 }
