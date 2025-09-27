@@ -139,6 +139,7 @@ public class BaseRequests {
                 .get(POSTS_PATH + "/" + postId)
                 .then()
                 .statusCode(401)
+                .body("data.status", equalTo(401))
                 .extract().as(DataError.class);
     }
 
@@ -156,6 +157,7 @@ public class BaseRequests {
                 .get(POSTS_PATH + "/" + postId)
                 .then()
                 .statusCode(403)
+                .body("data.status", equalTo(403))
                 .extract().as(DataError.class);
     }
 
