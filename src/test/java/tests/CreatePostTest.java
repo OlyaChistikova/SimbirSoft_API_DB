@@ -21,7 +21,7 @@ public class CreatePostTest extends BaseTest {
         Assert.assertEquals(requestPost.getTitle().getRaw(), responsePost.getTitle().getRaw());
         Assert.assertEquals(requestPost.getStatus(), responsePost.getStatus());
 
-        List<DataPost> listPosts = getAllPosts();
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
         List<Integer> ids = listPosts.stream().map(DataPost::getId).collect(Collectors.toList());
         List<String> titles = listPosts.stream()
                 .map(post -> post.getTitle().getRendered())
@@ -29,9 +29,9 @@ public class CreatePostTest extends BaseTest {
         Assert.assertTrue(ids.contains(postId));
         Assert.assertTrue(titles.contains(responsePost.getTitle().getRendered()));
 
-        checkSuccessPostDb(postId, "Тестовый заголовок", "Привет! Это мой тестовый пост.", "publish");
+        checkSuccessPostDb(postId, requestPost.getTitle().getRaw(), requestPost.getContent().getRaw(), requestPost.getStatus());
 
-        deletePostAfterCreation(postId);
+        deleteItemById(POSTS_PATH, postId, TOKEN);
         checkDeleteDb(postId, "trash");
     }
 
@@ -45,12 +45,12 @@ public class CreatePostTest extends BaseTest {
         Assert.assertTrue(responsePost.getContent().getRendered().isEmpty());
         Assert.assertEquals(responsePost.getStatus(), "draft");
 
-        DataPost postById = getPostById(postId);
+        DataPost postById = getItemById(DataPost.class, POSTS_PATH, postId, TOKEN);
         Assert.assertEquals(postById.getTitle().getRendered(), responsePost.getTitle().getRendered());
 
-        checkSuccessPostDb(postId, "Тестовый заголовок", "", "draft");
+        checkSuccessPostDb(postId, responsePost.getTitle().getRaw(), responsePost.getContent().getRaw(), responsePost.getStatus());
 
-        deletePostAfterCreation(postId);
+        deleteItemById(POSTS_PATH, postId, TOKEN);
         checkDeleteDb(postId, "trash");
     }
 
@@ -73,7 +73,7 @@ public class CreatePostTest extends BaseTest {
         Assert.assertEquals(responsePost.getMessage(), "Извините, вам не разрешено создавать записи от лица этого пользователя.");
         Assert.assertEquals(responsePost.getData().getStatus(), 401);
 
-        List<DataPost> listPosts = getAllPosts();
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
         List<String> titles = listPosts.stream()
                 .map(post -> post.getTitle().getRendered())
                 .collect(Collectors.toList());
