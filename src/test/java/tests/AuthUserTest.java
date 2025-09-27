@@ -21,12 +21,12 @@ public class AuthUserTest extends BaseTest {
 
     @AfterMethod
     public void deletePost() {
-        deletePostAfterCreation(postId);
+        deleteItemById(POSTS_PATH, postId, TOKEN);
     }
 
     @Test
     public void authWithToken() {
-        DataPost responsePost = getPostById(postId);
+        DataPost responsePost = getItemById(DataPost.class, POSTS_PATH, postId, TOKEN);
         Assert.assertEquals(responsePost.getId(), postId);
         Assert.assertEquals(responsePost.getStatus(), "private");
     }
