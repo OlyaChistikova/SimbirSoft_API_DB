@@ -30,12 +30,20 @@ public class BaseTest {
     public static final String POSTS_PATH = BaseRequests.POSTS_PATH;
 
     /**
+     * Путь для взаимодействия с пользователями.
+     */
+    public static final String USERS_PATH = BaseRequests.USERS_PATH;
+
+    /**
      * Данные для авторизации
      */
     protected static final String usernameAdmin = ParametersProvider.getProperty("usernameAdmin");
     protected static final String passwordAdmin = ParametersProvider.getProperty("passwordAdmin");
     protected static final String usernameAuthor = ParametersProvider.getProperty("usernameAuthor");
     protected static final String passwordAuthor = ParametersProvider.getProperty("passwordAuthor");
+    protected static final String usernameTest = ParametersProvider.getProperty("usernameTest");
+    protected static final String emailTest = ParametersProvider.getProperty("emailTest");
+    protected static final String passwordTest = ParametersProvider.getProperty("passwordTest");
 
     /**
      * Получение списка объектов любого типа по указанному маршруту без авторизации.
@@ -45,9 +53,9 @@ public class BaseTest {
      * @param <T>          Тип объектов в списке.
      * @return Список объектов заданного типа.
      */
-    public <T> List<T> getResourceAsList(Class<T> tClass, String resourcePath) {
+    public <T> List<T> getResourceAsList(Class<T> tClass, String resourcePath, String authToken) {
         ResponseBodyExtractionOptions body = given()
-                .spec(BaseRequests.requestSpec())
+                .spec(BaseRequests.requestSpec(authToken))
                 .when()
                 .get(resourcePath)
                 .then()
@@ -104,11 +112,22 @@ public class BaseTest {
      * @param content Ожидаемое содержание.
      * @param status  Ожидаемый статус.
      */
-    public void checkSuccessPostDb(Integer post_id, String title, String content, String status) {
+    public void checkSuccessPostDb(Integer post_id, String title, String content, String status, DataBaseHelper dbHelper) {
         Assert.assertEquals(dbHelper.getPostById(post_id).getId(), post_id, "ID поста в базе не совпадает");
         Assert.assertEquals(dbHelper.getPostById(post_id).getTitle().getRaw(), title, "Заголовок поста в базе не совпадает");
         Assert.assertEquals(dbHelper.getPostById(post_id).getContent().getRaw(), content, "Содержимое поста в базе не совпадает");
         Assert.assertEquals(dbHelper.getPostById(post_id).getStatus(), status, "Статус поста в базе не совпадает");
+    }
+
+    /**
+     * Проверяет, что пользователь существует в базе и его параметры совпадают.
+     *
+     * @param user_id  ID пользователя.
+     * @param username Ожидаемый логин пользователя
+     */
+    public void checkSuccessUserDb(Integer user_id, String username) {
+        Assert.assertEquals(dbHelper.getUserById(user_id).getId(), user_id, "ID пользователя в базе не совпадает");
+        Assert.assertEquals(dbHelper.getUserById(user_id).getUsername(), username, "Имя пользователя в базе не совпадает");
     }
 
     /**
