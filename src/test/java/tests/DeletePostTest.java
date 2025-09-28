@@ -1,5 +1,6 @@
 package tests;
 
+import helpers.DataBaseHelper;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -12,6 +13,7 @@ import static helpers.BaseRequests.*;
 
 public class DeletePostTest extends BaseTest {
     private Integer postId;
+    private final DataBaseHelper repo = new DataBaseHelper();
 
     @BeforeMethod
     public void createPostForDelete() {
@@ -23,7 +25,7 @@ public class DeletePostTest extends BaseTest {
     public void deleteCorrectPostWithAuthTest() {
         deleteCorrectPost(postId);
 
-        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH, TOKEN);
         List<Integer> ids = listPosts.stream().map(DataPost::getId).collect(Collectors.toList());
         Assert.assertFalse(ids.contains(postId));
 
@@ -35,7 +37,7 @@ public class DeletePostTest extends BaseTest {
         deleteCorrectPost(postId);
         deleteAlreadyDeletedPost(postId);
 
-        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH, TOKEN);
         List<Integer> ids = listPosts.stream().map(DataPost::getId).collect(Collectors.toList());
         Assert.assertFalse(ids.contains(postId));
 
@@ -46,7 +48,7 @@ public class DeletePostTest extends BaseTest {
     public void deleteCorrectPostWithoutAuthTest() {
         deleteCorrectPostWithoutAuth(postId);
 
-        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH, TOKEN);
         List<Integer> ids = listPosts.stream().map(DataPost::getId).collect(Collectors.toList());
         Assert.assertTrue(ids.contains(postId));
 
