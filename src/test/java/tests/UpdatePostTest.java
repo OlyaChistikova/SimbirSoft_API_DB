@@ -1,5 +1,6 @@
 package tests;
 
+import helpers.DataBaseHelper;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
@@ -16,6 +17,7 @@ import static helpers.BaseRequests.*;
 public class UpdatePostTest extends BaseTest {
     private Integer postId;
     private DataPost requestBody;
+    private final DataBaseHelper repo = new DataBaseHelper();
 
     @BeforeMethod
     public void createPostForUpdate() {
@@ -37,14 +39,14 @@ public class UpdatePostTest extends BaseTest {
         Assert.assertEquals(responsePost.getContent().getRaw(), requestUpdateBody.getContent().getRaw());
         Assert.assertEquals(responsePost.getStatus(), requestUpdateBody.getStatus());
 
-        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH, TOKEN);
         String actualContentPost = listPosts.get(0).getContent().getRendered().replace("<p>", "").replace("</p>", "").trim();
 
         Assert.assertEquals(listPosts.get(0).getId(), postId);
         Assert.assertEquals(listPosts.get(0).getTitle().getRendered(), responsePost.getTitle().getRendered());
         Assert.assertEquals(actualContentPost, responsePost.getContent().getRaw());
 
-        checkSuccessPostDb(postId, responsePost.getTitle().getRaw(), responsePost.getContent().getRaw(), responsePost.getStatus());
+        checkSuccessPostDb(postId, responsePost.getTitle().getRaw(), responsePost.getContent().getRaw(), responsePost.getStatus(), repo);
     }
 
     @DataProvider(name = "updateIdProvider")
@@ -60,7 +62,7 @@ public class UpdatePostTest extends BaseTest {
         DataPost requestUpdateBody = createPostBodyWithId(updateId, "Новый обновленный тестовый пост", "Привет! Это мой обновленный пост.", "publish");
         updateInvalidPost(requestUpdateBody, updateId);
 
-        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH);
+        List<DataPost> listPosts = getResourceAsList(DataPost.class, POSTS_PATH, TOKEN);
         List<String> titles = listPosts.stream()
                 .map(post -> post.getTitle().getRendered())
                 .collect(Collectors.toList());
@@ -88,6 +90,6 @@ public class UpdatePostTest extends BaseTest {
         Assert.assertEquals(contentResponse, responseAfterGetPost.getContent().getRendered().replace("<p>", "").replace("</p>", "").trim());
         Assert.assertEquals(statusResponse, responseAfterGetPost.getStatus());
 
-        checkSuccessPostDb(postId, requestBody.getTitle().getRaw(), requestBody.getContent().getRaw(), requestBody.getStatus());
+        checkSuccessPostDb(postId, requestBody.getTitle().getRaw(), requestBody.getContent().getRaw(), requestBody.getStatus(), repo);
     }
 }
