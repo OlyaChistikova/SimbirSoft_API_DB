@@ -1,7 +1,6 @@
 package helpers;
 
 import pojo.DataPost;
-import pojo.DataUser;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -82,15 +81,6 @@ public class DataBaseHelper {
         executeUpdate(sql, author, post.getContent().getRendered(), post.getTitle().getRaw(), post.getStatus());
     }
 
-    /**
-     * Метод для добавления нового пользователя в базу данных.
-     *
-     * @param user Экземпляр класса DataUser, содержащий данные пользователя
-     */
-    public void addUser(DataUser user) {
-        String sqlUser = "INSERT INTO wp_users (user_login, user_pass, user_nicename, user_email, user_url, user_registered, user_activation_key, user_status, display_name) VALUES(?, ?, '', ?, '', NOW(), '', 0, ?)";
-        executeUpdate(sqlUser, user.getUsername(), user.getPassword(), user.getEmail(), user.getUsername());
-    }
 
     /**
      * Метод для получения всех постов из базы данных.
@@ -126,75 +116,5 @@ public class DataBaseHelper {
             }
             return null;
         }, id);
-    }
-
-    /**
-     * Метод для получения ID поста по его title.
-     *
-     * @param title Уникальный заголовок поста
-     * @return Объект DataPost, соответствующий запрошенному посту, или null, если пост не найден
-     */
-    public DataPost getPostByTitle(String title) {
-        String sql = "SELECT ID, post_title, post_content, post_status FROM wp_posts WHERE post_title = ?";
-        return executeQuery(sql, rs -> {
-            if (rs.next()) {
-                DataPost.Title titleObj = new DataPost.Title(rs.getString("post_title"), "");
-                DataPost.Content contentObj = new DataPost.Content(rs.getString("post_content"), "");
-                return new DataPost(rs.getInt("ID"), titleObj, contentObj, rs.getString("post_status"));
-            }
-            return null;
-        }, title);
-    }
-
-    /**
-     * Метод для получения данных пользователя по его id.
-     *
-     * @param id Уникальный логин пользователя
-     * @return Объект DataUser, соответствующий запрошенному посту, или null, если пользователь не найден
-     */
-    public DataUser getUserById(Integer id) {
-        String sql = "SELECT ID, user_login, user_email, user_pass FROM wp_users WHERE ID = ?;";
-        return executeQuery(sql, rs -> {
-            if (rs.next()) {
-                return new DataUser(rs.getInt("ID"), rs.getString("user_login"), rs.getString("user_email"), rs.getString("user_pass"));
-            }
-            return null;
-        }, id);
-    }
-
-    /**
-     * Метод для получения данных пользователя по его username.
-     *
-     * @param username Уникальный логин пользователя
-     * @return Объект DataUser, соответствующий запрошенному посту, или null, если пользователь не найден
-     */
-    public DataUser getUserByName(String username) {
-        String sql = "SELECT ID, user_login, user_email, user_pass FROM wp_users WHERE user_login = ?;";
-        return executeQuery(sql, rs -> {
-            if (rs.next()) {
-                return new DataUser(rs.getInt("ID"), rs.getString("user_login"), rs.getString("user_email"), rs.getString("user_pass"));
-            }
-            return null;
-        }, username);
-    }
-
-    /**
-     * Метод для удаления поста по его ID.
-     *
-     * @param id Уникальный идентификатор поста для удаления
-     */
-    public void deletePost(Integer id) {
-        String sql = "DELETE FROM wp_posts WHERE ID = ?";
-        executeUpdate(sql, id);
-    }
-
-    /**
-     * Метод для удаления пользователя по его ID.
-     *
-     * @param id Уникальный идентификатор пользователя для удаления
-     */
-    public void deleteUser(Integer id) {
-        String sql = "DELETE FROM wp_users WHERE ID = ?";
-        executeUpdate(sql, id);
     }
 }
