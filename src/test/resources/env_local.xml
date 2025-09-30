@@ -9,6 +9,9 @@
     <entry key="passwordAdmin">123-Test.Chistikova</entry>
     <entry key="usernameAuthor">Test_User</entry>
     <entry key="passwordAuthor">test_Password-123</entry>
+    <entry key="usernameTest">UserTest</entry>
+    <entry key="emailTest">tester.user@gmail.com</entry>
+    <entry key="passwordTest">123Test_user</entry>
     <entry key="urlDB">jdbc:mysql://localhost:3306/wordpress</entry>
     <entry key="usernameDB">wordpress</entry>
     <entry key="passwordDB">wordpress</entry>
