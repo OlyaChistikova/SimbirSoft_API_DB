@@ -5,6 +5,7 @@ import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
 import pojo.DataError;
 import pojo.DataPost;
+import pojo.DataUser;
 
 import java.util.Base64;
 
@@ -24,6 +25,11 @@ public class BaseRequests {
      * Путь для взаимодействия с постами.
      */
     public static final String POSTS_PATH = ParametersProvider.getProperty("posts_path");
+
+    /**
+     * Путь для взаимодействия с пользователями.
+     */
+    public static final String USERS_PATH = ParametersProvider.getProperty("users_path");
 
     public static RequestSpecification requestSpec(String authToken) {
         return new RequestSpecBuilder()
@@ -332,5 +338,20 @@ public class BaseRequests {
                 .body("data.status", equalTo(401))
                 .extract()
                 .as(DataError.class);
+    }
+
+    /**
+     * Создает объект DataUser с заданным ID и тестовыми данными.
+     *
+     * @param username   Логин пользователя
+     * @param password  Пароль пользователя
+     * @return Объект DataUser с заполненными полями.
+     */
+    public static DataUser createUserBody(String username, String email,  String password) {
+        return DataUser.builder()
+                .username(username)
+                .email(email)
+                .password(password)
+                .build();
     }
 }
